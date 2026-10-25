@@ -1,0 +1,73 @@
+{
+  "name": "Workflow 4 - Consulta de Tickets",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "consultar-tickets",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "35a528f1-f1b7-447c-a4a5-f3610f5248d0",
+      "name": "Webhook",
+      "webhookId": "3a839e86-fb26-48b0-a340-e49c79903865"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM tickets ORDER BY id ASC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "47855d76-e241-47e9-9a93-5a0071f808f0",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "GG03iBLbZTouZBRt",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8b4897be-f314-405a-bfc3-e1ac61991f6b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "372e12b39169ff943b5fe90143e1074a9962dcca4855dc61f872fd045acc91bc"
+  },
+  "nodeGroups": [],
+  "id": "L0bSfrp8Gnr5P8nd",
+  "tags": []
+}

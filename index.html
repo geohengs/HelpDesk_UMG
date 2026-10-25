@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpDesk UMG - Soporte Técnico</title>
+    <style>
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #eef2f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .form-container { 
+            background-color: #ffffff; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 450px; 
+        }
+        h2 { 
+            text-align: center; 
+            color: #003b5c; 
+            margin-bottom: 20px;
+        }
+        .form-group { 
+            margin-bottom: 15px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 5px; 
+            color: #333; 
+            font-weight: bold; 
+            font-size: 14px;
+        }
+        input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            font-family: inherit;
+        }
+        textarea { 
+            resize: vertical; 
+            height: 100px; 
+        }
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: #003b5c; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            font-weight: bold;
+            cursor: pointer; 
+            transition: background 0.3s; 
+            margin-top: 10px;
+        }
+        button:hover { 
+            background-color: #002235; 
+        }
+        .success-msg { 
+            display: none; 
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center; 
+            margin-top: 15px; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>HelpDesk UMG</h2>
+        <form id="ticketForm">
+            <div class="form-group">
+                <label for="correo">Correo Institucional:</label>
+                <input type="email" id="correo" required placeholder="estudiante@umg.edu.gt">
+            </div>
+            
+            <div class="form-group">
+                <label for="asunto">Asunto del problema:</label>
+                <input type="text" id="asunto" required placeholder="Ej. No tengo acceso al portal">
+            </div>
+            
+            <div class="form-group">
+                <label for="descripcion">Descripción detallada:</label>
+                <textarea id="descripcion" required placeholder="Describe tu problema con el mayor detalle posible..."></textarea>
+            </div>
+            
+            <button type="submit">Enviar Ticket a Soporte</button>
+            <div id="mensajeExito" class="success-msg">¡Ticket creado y enviado con éxito!</div>
+        </form>
+    </div>
+
+    <!-- Aquí va la lógica de conexión (JavaScript) -->
+    <script>
+        document.getElementById('ticketForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Evita que la página se recargue al enviar el formulario
+
+            // 1. Recolectar lo que el usuario escribió
+            const datosDelTicket = {
+                correo_usuario: document.getElementById('correo').value,
+                asunto: document.getElementById('asunto').value,
+                descripcion: document.getElementById('descripcion').value
+            };
+
+            // 2. Aquí va la URL del workflow 1
+            const webhookUrl = 'http://localhost:5678/webhook/crear-ticket'; 
+
+            try {
+                // 3. Enviar los datos a n8n
+                const respuesta = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosDelTicket)
+                });
+
+                if(respuesta.ok) {
+                    // Mostrar mensaje verde de éxito y limpiar formulario
+                    document.getElementById('mensajeExito').style.display = 'block';
+                    document.getElementById('ticketForm').reset();
+                    
+                    // Ocultar mensaje después de 5 segundos
+                    setTimeout(() => { 
+                        document.getElementById('mensajeExito').style.display = 'none'; 
+                    }, 5000);
+                } else {
+                    alert("Hubo un problema al enviar el ticket.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("No se pudo conectar con el servidor. ¿Está n8n escuchando?");
+            }
+        });
+    </script>
+</body>
+</html>

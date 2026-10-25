@@ -1,0 +1,77 @@
+{
+  "name": "Workflow 2 - Actualización Admin",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "actualizar-ticket",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "581b27a1-63e9-4dc5-b063-d5a05707c88f",
+      "name": "Webhook",
+      "webhookId": "7a55c926-2e6e-4ed5-af4f-4a439cebd018"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tickets SET estado = 'Resuelto' WHERE id = {{$json.body.ticket_id}};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "15d8ff0a-85a0-4d0e-a782-10121db08d36",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "GG03iBLbZTouZBRt",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "be2750e8-c552-4aa4-bdf0-7ae3a3f725cc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "372e12b39169ff943b5fe90143e1074a9962dcca4855dc61f872fd045acc91bc"
+  },
+  "nodeGroups": [],
+  "id": "Azff89QCI5an4qhS",
+  "tags": []
+}

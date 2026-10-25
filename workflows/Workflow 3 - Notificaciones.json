@@ -1,0 +1,74 @@
+{
+  "name": "Workflow 3 - Notificaciones",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "enviar-correo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "453fee78-1f9e-473b-bc91-2910fa67ba2e",
+      "name": "Webhook",
+      "webhookId": "9aeba58e-409a-402b-9a9c-308a6aad38c5"
+    },
+    {
+      "parameters": {
+        "fromEmail": "oligorriah@miumg.edu.gt",
+        "toEmail": "={{ $json.body.correo_destino }}",
+        "subject": "Actualización de Ticket de HelpDesk UMG",
+        "emailFormat": "text",
+        "text": "=¡Hola!\n\nTe notificamos que tu reporte en el HelpDesk UMG ha sido actualizado.\n\nEstado actual: {{ $json.body.nuevo_estado }}\n\nGracias por utilizar el sistema de soporte.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "cc5cabd9-d287-4534-8254-86de635ce726",
+      "name": "Send an Email",
+      "webhookId": "1e99c057-54b7-4655-9868-8d6fde9810d3",
+      "credentials": {
+        "smtp": {
+          "id": "udtCpdobObmcfcwJ",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d1a1fcd9-e38f-42f9-8513-0f62cd83f4ec",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "372e12b39169ff943b5fe90143e1074a9962dcca4855dc61f872fd045acc91bc"
+  },
+  "nodeGroups": [],
+  "id": "jk8cvB7kFiaPDkri",
+  "tags": []
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador - HelpDesk UMG</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; }
+        .dashboard-container { background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); max-width: 1100px; margin: 0 auto; }
+        h2 { color: #003b5c; text-align: center; border-bottom: 2px solid #003b5c; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* Estilos para las Tarjetas de Métricas (KPIs) */
+        .kpi-container { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 15px; }
+        .kpi-card { flex: 1; background-color: #f8f9fa; border-left: 5px solid #003b5c; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .kpi-card h3 { margin: 0; font-size: 14px; color: #6c757d; text-transform: uppercase; }
+        .kpi-card .kpi-value { font-size: 28px; font-weight: bold; color: #333; margin-top: 10px; }
+        .kpi-resueltos { border-left-color: #28a745; }
+        .kpi-pendientes { border-left-color: #ffc107; }
+
+        /* Controles de la tabla (Buscador y Botón) */
+        .controles { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .buscador { width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+        .btn-actualizar { padding: 10px 20px; background-color: #003b5c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-actualizar:hover { background-color: #002235; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #003b5c; color: white; }
+        tr:hover { background-color: #f5f5f5; }
+        
+        /* Estados y Botones de Acción */
+        .status { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; background-color: #ffeeba; color: #856404; }
+        .status.resuelto { background-color: #d4edda; color: #155724; }
+        .btn-resolver { background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-resolver:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h2>Panel de Control - Tickets Ingresados</h2>
+
+        <!-- Sección de Tarjetas de Métricas (KPIs) -->
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <h3>Total de Tickets</h3>
+                <div class="kpi-value" id="kpiTotal">0</div>
+            </div>
+            <div class="kpi-card kpi-pendientes">
+                <h3>Pendientes / Nuevos</h3>
+                <div class="kpi-value" id="kpiPendientes">0</div>
+            </div>
+            <div class="kpi-card kpi-resueltos">
+                <h3>Resueltos</h3>
+                <div class="kpi-value" id="kpiResueltos">0</div>
+            </div>
+        </div>
+
+        <!-- Sección de Búsqueda y Actualización -->
+        <div class="controles">
+            <input type="text" id="inputBusqueda" class="buscador" onkeyup="filtrarTickets()" placeholder="🔍 Buscar por ID, correo, asunto o descripción...">
+            <button class="btn-actualizar" onclick="cargarTickets()">🔄 Actualizar Lista</button>
+        </div>
+        
+        <!-- Tabla de Tickets -->
+        <table id="tablaTickets">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Correo Usuario</th>
+                    <th>Asunto</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los tickets cargarán aquí -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Función principal para cargar datos y calcular métricas
+        async function cargarTickets() {
+            const tbody = document.querySelector('#tablaTickets tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Cargando tickets...</td></tr>';
+
+            try {
+                const respuesta = await fetch('http://localhost:5678/webhook/consultar-tickets');
+                const tickets = await respuesta.json();
+                tbody.innerHTML = ''; 
+
+                if (!Array.isArray(tickets) || tickets.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay tickets registrados aún.</td></tr>';
+                    document.getElementById('kpiTotal').innerText = "0";
+                    document.getElementById('kpiPendientes').innerText = "0";
+                    document.getElementById('kpiResueltos').innerText = "0";
+                    return;
+                }
+
+                // Variables para las métricas
+                let total = tickets.length;
+                let resueltos = 0;
+                let pendientes = 0;
+
+                tickets.forEach(ticket => {
+                    const estadoActual = ticket.estado || 'Nuevo';
+                    const esResuelto = estadoActual.toLowerCase() === 'resuelto';
+                    
+                    // Contadores para las métricas
+                    if (esResuelto) {
+                        resueltos++;
+                    } else {
+                        pendientes++;
+                    }
+
+                    const claseEstado = esResuelto ? 'status resuelto' : 'status';
+                    const botonAccion = esResuelto ? '✅ Completado' : `<button class="btn-resolver" onclick="resolverTicket(${ticket.id})">Resolver</button>`;
+
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td><strong>#${ticket.id}</strong></td>
+                        <td>${ticket.correo_usuario}</td>
+                        <td>${ticket.asunto}</td>
+                        <td>${ticket.descripcion}</td>
+                        <td><span class="${claseEstado}">${estadoActual}</span></td>
+                        <td>${botonAccion}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+
+                // Actualizar los números en las tarjetas visuales
+                document.getElementById('kpiTotal').innerText = total;
+                document.getElementById('kpiPendientes').innerText = pendientes;
+                document.getElementById('kpiResueltos').innerText = resueltos;
+
+            } catch (error) {
+                console.error("Error al cargar:", error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error de conexión con el servidor.</td></tr>';
+            }
+        }
+
+        // Función para resolver el ticket (Workflow 2)
+        async function resolverTicket(idTicket) {
+            if(!confirm(`¿Estás seguro de marcar el ticket #${idTicket} como Resuelto?`)) return;
+
+            try {
+                const respuesta = await fetch('http://localhost:5678/webhook/actualizar-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ticket_id: idTicket })
+                });
+
+                if(respuesta.ok) {
+                    cargarTickets(); // Recargar la tabla y los KPIs automáticamente
+                } else {
+                    alert("Hubo un error al actualizar el ticket en el servidor.");
+                }
+            } catch (error) {
+                console.error("Error al actualizar:", error);
+                alert("Error de conexión al intentar actualizar el ticket.");
+            }
+        }
+
+        // Función para el buscador en tiempo real
+        function filtrarTickets() {
+            const input = document.getElementById("inputBusqueda").value.toLowerCase();
+            const tabla = document.getElementById("tablaTickets");
+            const filas = tabla.getElementsByTagName("tr");
+
+            // Empezamos desde 1 para saltar los encabezados (<thead>)
+            for (let i = 1; i < filas.length; i++) {
+                // Obtenemos todo el texto de la fila actual
+                const textoFila = filas[i].innerText.toLowerCase();
+                
+                // Si el texto escrito en el buscador está en la fila, la mostramos, sino, la ocultamos
+                if (textoFila.includes(input)) {
+                    filas[i].style.display = "";
+                } else {
+                    filas[i].style.display = "none";
+                }
+            }
+        }
+
+        window.onload = cargarTickets;
+    </script>
+</body>
+</html>
