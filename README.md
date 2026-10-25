@@ -12,7 +12,7 @@ Este proyecto es una solución Full Stack de automatización para la gestión de
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone [URL_DE_TU_REPOSITORIO]
+   git clone [https://github.com/geohengs/HelpDesk_UMG.git]
 
 ## Levantar los servicios:
 Asegurarse de tener Docker instalado y ejecutar esto en la terminal:
